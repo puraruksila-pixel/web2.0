@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>สินค้าทั้งหมด</title>
+  <style>
+    /* รวม CSS ทั้งหมดจากที่คุณให้มาไว้ตรงนี้ */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 20px;
+      background: #f9f9f9;
+      max-width: 900px;
+      margin: auto;
+    }
+    h2, h3 {
+      color: #22b3c1;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    a.btn-back {
+      display: inline-block;
+      margin: 10px 5px;
+      background-color: #ddd;
+      color: #333;
+      padding: 10px 20px;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: background-color 0.3s ease;
+    }
+    a.btn-back:hover {
+      background-color: #ccc;
+    }
+    .product-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+      margin-bottom: 40px;
+    }
+    .product-card {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      overflow: hidden;
+      width: 300px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      cursor: default;
+    }
+    .product-image {
+      width: 100%;
+      height: 220px;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .product-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+    .product-image:hover img {
+      transform: scale(1.05);
+    }
+    .product-info {
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .product-title {
+      font-weight: 700;
+      font-size: 1.3rem;
+      color: #333;
+    }
+    .product-desc {
+      font-size: 0.9rem;
+      color: #666;
+      min-height: 40px;
+    }
+    .product-price {
+      font-weight: 700;
+      font-size: 1.3rem;
+      color: #22b3c1;
+      margin-top: 5px;
+    }
+    .btn-group {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+    }
+    .size-dropdown {
+      padding: 6px 8px;
+      font-size: 0.9rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      width: 70px;
+      cursor: pointer;
+    }
+    .btn-shop {
+      background-color: #22b3c1;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 999px;
+      color: white;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .btn-shop:hover {
+      background-color: #1b8a99;
+    }
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.6);
+      backdrop-filter: blur(3px);
+    }
+    .modal-content {
+      background-color: white;
+      margin: 60px auto;
+      padding: 20px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 460px;
+      position: relative;
+      text-align: center;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+    }
+    .close {
+      color: #aaa;
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+    .close:hover,
+    .close:focus {
+      color: #000;
+    }
+    .modal-img {
+      max-width: 100%;
+      max-height: 250px;
+      object-fit: contain;
+      border-radius: 6px;
+      margin-bottom: 15px;
+    }
+    #modalTitle {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #22b3c1;
+      margin-bottom: 8px;
+    }
+    #modalDesc {
+      font-size: 1rem;
+      color: #555;
+      margin-bottom: 10px;
+    }
+    #modalPrice {
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: #22b3c1;
+      margin-bottom: 15px;
+    }
+
+    /* กลุ่มเสื้อ นักเรียน */
+    #shirt-products {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      flex-wrap: nowrap;
+      margin-bottom: 40px;
+    }
+
+    /* กลุ่มสินค้าอื่น ๆ */
+    #other-products {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+      margin-bottom: 40px;
+    }
+    #other-products .product-card {
+      width: calc((100% / 3) - 20px);
+      min-width: 220px;
+    }
+  </style>
+</head>
+<body>
+  <h2>สินค้าทั้งหมด</h2>
+  <div style="text-align: center; margin-bottom: 20px;">
+    <a href="index.html" class="btn-back">← กลับหน้าแรก</a> |
+    <a href="deals.html" class="btn-back">ดูตะกร้าสินค้า 🛒</a>
+  </div>
+
+  <h3>เสื้อ นักเรียน</h3>
+  <div class="product-grid" id="shirt-products"></div>
+
+  <h3>สินค้าอื่น ๆ</h3>
+  <div class="product-grid" id="other-products"></div>
+
+  <!-- Modal -->
+  <div id="productModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <img id="modalImage" class="modal-img" src="" alt="">
+      <h3 id="modalTitle"></h3>
+      <p id="modalDesc"></p>
+      <div class="product-price" id="modalPrice"></div>
+      <div class="btn-group">
+        <select class="size-dropdown" id="modalSize">
+          <option value="">เลือกไซส์</option>
+          <option value="S">S (รอบอก 32-34 นิ้ว)</option>
+          <option value="M">M (รอบอก 35-37 นิ้ว)</option>
+          <option value="L">L (รอบอก 38-40 นิ้ว)</option>
+          <option value="XL">XL (รอบอก 41-43 นิ้ว)</option>
+        </select>
+        <button class="btn-shop" onclick="addModalToCart()">เพิ่มในตะกร้า</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const products = [
+      { name: "เสื้อนักเรียนชาย", image: "เสื้อ นร.jpg", desc: "เสื้อสีขาว ตราสมอ ผ้านุ่ม ใส่สบาย", price: 350, category: 'shirt' },
+      { name: "เสื้อนักเรียนหญิง ม.ต้น", image: "เสื้อนักเรียนหญิง ม.ต้น.png", desc: "เสื้อสีขาว ผ้านุ่ม ใส่สบาย", price: 350, category: 'shirt' },
+      { name: "เสื้อนักเรียนหญิง ม.ปลาย", image: "เสื้อนักเรียนหญิงตราสมอเตรียมม-ปลาย.jpg", desc: "เสื้อสีขาว ผ้านุ่ม ใส่สบาย", price: 360, category: 'shirt' },
+      { name: "กางเกงนักเรียนชาย", image: "กางเกงนร.png", desc: "กางเกงนักเรียนชาย เนื้อผ้าทนทาน ใส่สบาย", price: 320 },
+      { name: "กระโปรงนักเรียนหญิง", image: "8853855014300_2-20240411104743-.png", desc: "กระโปรงจีบ สีกรม ผ้านุ่ม ทรงสวย", price: 290 },
+      { name: "เสื้อพละ", image: "Untitled design (1).png", desc: "เสื้อพละโรงเรียน เนื้อผ้าระบายอากาศดี", price: 280 },
+      { name: "กางเกงพละ", image: "Untitled design (2).png", desc: "กางเกงพละใส่สบาย ไม่ร้อน", price: 260 },
+      { name: "เสื้อพื้นเมืองชาย", image: "เสืื้อพื้นเมือง ชาย.png", desc: "เสื้อพื้นเมืองชาย ลายสวยงาม", price: 450 },
+      { name: "เสื้อพื้นเมืองหญิง", image: "Untitled design - 2.png", desc: "เสื้อพื้นเมืองหญิง สีสวย ผ้านุ่ม", price: 470 },
+      { name: "กางเกงพื้นเมือง", image: "กางเกงพื้นเมือง ชาย.png", desc: "กางเกงพื้นเมือง เนื้อผ้าคุณภาพดี", price: 400 },
+      { name: "ผ้าซิ่นพื้นเมือง", image: "Untitled design.png", desc: "ผ้าซิ่นลายพื้นเมือง สวยงาม", price: 420 },
+      { name: "เสื้อวอร์มแขนยาวโรงเรียน", image: "Untitled design (3).png", desc: "เสื้อวอร์มแขนยาว โรงเรียน ผ้านุ่ม ใส่สบาย", price: 550 }
+    ];
+
+    const shirtContainer = document.getElementById('shirt-products');
+    const otherContainer = document.getElementById('other-products');
+
+    function createProductCard(product, index) {
+      const card = document.createElement('div');
+      card.className = 'product-card';
+      card.innerHTML = `
+        <div class="product-image" onclick="openModal(${index})">
+          <img src="/img/${product.image}" alt="${product.name}" />
+        </div>
+        <div class="product-info">
+          <div class="product-title">${product.name}</div>
+          <div class="product-desc">${product.desc}</div>
+          <div class="product-price">${product.price} บาท</div>
+          <div class="btn-group">
+            <select class="size-dropdown">
+              <option value="">เลือกไซส์</option>
+              <option value="S">S</option>
+              <option value="M">M</option>
+              <option value="L">L</option>
+              <option value="XL">XL</option>
+            </select>
+            <button class="btn-shop" onclick="addToCart(this)">เพิ่มในตะกร้า</button>
+          </div>
+        </div>`;
+      return card;
+    }
+
+    products.forEach((product, index) => {
+      const card = createProductCard(product, index);
+      (product.category === 'shirt' ? shirtContainer : otherContainer).appendChild(card);
+    });
+
+    function addToCart(button) {
+      const card = button.closest('.product-card');
+      const title = card.querySelector('.product-title').innerText;
+      const size = card.querySelector('.size-dropdown').value;
+      const priceText = card.querySelector('.product-price').innerText;
+      const price = parseInt(priceText.replace(/[^\d]/g, ''));
+
+      if (!size) return alert("กรุณาเลือกไซส์ก่อนเพิ่มสินค้าในตะกร้า");
+
+      let cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const existing = cart.findIndex(item => item.name === title && item.size === size);
+      if (existing >= 0) cart[existing].qty++;
+      else cart.push({ name: title, size, price, qty: 1 });
+
+      localStorage.setItem('cart', JSON.stringify(cart));
+      alert(`เพิ่ม "${title}" ไซส์ ${size} ลงในตะกร้าเรียบร้อยแล้ว`);
+    }
+
+    function openModal(index) {
+      const product = products[index];
+      document.getElementById('modalImage').src = `/img/${product.image}`;
+      document.getElementById('modalTitle').innerText = product.name;
+      document.getElementById('modalDesc').innerText = product.desc;
+      document.getElementById('modalPrice').innerText = product.price + ' บาท';
+      document.getElementById('modalSize').value = '';
+      window.currentProduct = product;
+      document.getElementById('productModal').style.display = 'block';
+    }
+
+    function closeModal() {
+      document.getElementById('productModal').style.display = 'none';
+    }
+
+    function addModalToCart() {
+      const size = document.getElementById('modalSize').value;
+      if (!size) return alert("กรุณาเลือกไซส์ก่อนเพิ่มสินค้าในตะกร้า");
+      const product = window.currentProduct;
+      let cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const existing = cart.findIndex(item => item.name === product.name && item.size === size);
+      if (existing >= 0) cart[existing].qty++;
+      else cart.push({ name: product.name, size, price: product.price, qty: 1 });
+      localStorage.setItem('cart', JSON.stringify(cart));
+      alert(`เพิ่ม "${product.name}" ไซส์ ${size} ลงในตะกร้าเรียบร้อยแล้ว`);
+      closeModal();
+    }
+
+    window.onclick = function(event) {
+      const modal = document.getElementById('productModal');
+      if (event.target === modal) closeModal();
+    };
+  </script>
+</body>
+</html>

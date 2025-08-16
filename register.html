@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>สมัครสมาชิก</title>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Prompt', sans-serif;
+      background: url(/img/พื้นหลัง.JPG) no-repeat center center fixed;
+      background-size: cover;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* เพิ่ม overlay ปรับความมืดพื้นหลัง */
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.35);
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      background-color: rgba(255, 255, 255, 0.95);
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2);
+      width: 100%;
+      max-width: 420px;
+      margin: auto;
+      top: 50%;
+      transform: translateY(10%);
+      backdrop-filter: blur(6px);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 25px;
+      color: #333;
+      font-weight: 600;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+      position: relative;
+    }
+
+    .form-group label {
+      color: #444;
+      font-weight: 500;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.3s ease;
+    }
+
+    .form-group input:focus {
+      border-color: #007bff;
+      outline: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    #message {
+      margin-top: 15px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .link-to-login {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .link-to-login a {
+      color: #007bff;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .link-to-login a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>สมัครสมาชิก</h2>
+    <form id="registrationForm">
+      <div class="form-group">
+        <label for="firstName">ชื่อ:</label>
+        <input type="text" id="firstName" required>
+      </div>
+      <div class="form-group">
+        <label for="lastName">นามสกุล:</label>
+        <input type="text" id="lastName" required>
+      </div>
+      <div class="form-group">
+        <label for="studentId">รหัสนักเรียน (5 ตัวอักษร):</label>
+        <input type="text" id="studentId" maxlength="5" required>
+      </div>
+      <div class="form-group">
+        <label for="password">รหัสผ่าน:</label>
+        <input type="password" id="password" required>
+      </div>
+      <div class="form-group">
+        <label for="confirmPassword">ยืนยันรหัสผ่าน:</label>
+        <input type="password" id="confirmPassword" required>
+      </div>
+      <button type="submit">สมัครสมาชิก</button>
+      <p id="message"></p>
+    </form>
+    <div class="link-to-login">
+      <p>มีบัญชีอยู่แล้ว? <a href="login.html">เข้าสู่ระบบที่นี่</a></p>
+    </div>
+  </div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDENH4wROlJVnmanW7KlwGB9trQ40uA1j8",
+      authDomain: "mystudentapp-b1467.firebaseapp.com",
+      projectId: "mystudentapp-b1467",
+      storageBucket: "mystudentapp-b1467.firebasestorage.app",
+      messagingSenderId: "313738924819",
+      appId: "1:313738924819:web:053e5e92e9d92982eec0e6",
+      measurementId: "G-5N8Z18F1T0"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    const DUMMY_EMAIL_DOMAIN = 'students.your-app-domain.com';
+    const registrationForm = document.getElementById('registrationForm');
+    const messageDisplay = document.getElementById('message');
+
+    function displayMessage(msg, isError = true) {
+      messageDisplay.textContent = msg;
+      messageDisplay.style.color = isError ? 'red' : 'green';
+    }
+
+    registrationForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const firstName = document.getElementById('firstName').value.trim();
+      const lastName = document.getElementById('lastName').value.trim();
+      const studentId = document.getElementById('studentId').value.trim();
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      displayMessage('');
+
+      if (studentId.length !== 5) {
+        displayMessage('รหัสนักเรียนต้องมี 5 ตัวอักษรเท่านั้น');
+        return;
+      }
+      if (password !== confirmPassword) {
+        displayMessage('รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน');
+        return;
+      }
+      if (password.length < 6) {
+        displayMessage('รหัสผ่านต้องมีความยาวอย่างน้อย 6 ตัวอักษร');
+        return;
+      }
+
+      const dummyEmail = `${studentId}@${DUMMY_EMAIL_DOMAIN}`;
+
+      try {
+        const studentQuery = await db.collection('students').where('student_id', '==', studentId).get();
+        if (!studentQuery.empty) {
+          displayMessage('รหัสนักเรียนนี้มีผู้ใช้งานแล้ว กรุณาใช้รหัสอื่น');
+          return;
+        }
+
+        const userCredential = await auth.createUserWithEmailAndPassword(dummyEmail, password);
+        const user = userCredential.user;
+
+        await db.collection('students').doc(user.uid).set({
+          user_id: user.uid,
+          first_name: firstName,
+          last_name: lastName,
+          student_id: studentId,
+          email_for_auth: dummyEmail
+        });
+
+        displayMessage('สมัครสมาชิกสำเร็จแล้ว! กำลังเปลี่ยนหน้า...', false);
+        setTimeout(() => {
+          window.location.href = 'login.html';
+        }, 2000);
+
+      } catch (error) {
+        if (error.code === 'auth/email-already-in-use') {
+          displayMessage('อีเมล (รหัสนักเรียน) นี้ถูกใช้งานแล้ว');
+        } else if (error.code === 'auth/weak-password') {
+          displayMessage('รหัสผ่านไม่แข็งแรงพอ (ต้องมีอย่างน้อย 6 ตัวอักษร)');
+        } else {
+          displayMessage(`เกิดข้อผิดพลาด: ${error.message}`);
+        }
+      }
+      db.collection('users').doc(user.uid).set({
+  firstName: inputFirstName,
+  lastName: inputLastName,
+  studentId: inputStudentId,
+});
+
+    });
+  </script>
+
+</body>
+</html>

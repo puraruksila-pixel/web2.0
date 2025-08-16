@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ยืนยันคำสั่งซื้อ</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background-color: #f0f0f0;
+      text-align: center;
+      padding: 60px 20px;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 40px 20px;
+      max-width: 500px;
+      margin: auto;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .checkmark {
+      font-size: 4rem;
+      color: #2e7d32;
+      margin-bottom: 20px;
+    }
+    .message {
+      font-size: 1.2rem;
+      color: #333;
+    }
+    .phone {
+      font-weight: bold;
+      color: #22b3c1;
+    }
+    .btn-back {
+      margin-top: 30px;
+      background-color: #22b3c1;
+      color: white;
+      padding: 12px 30px;
+      border: none;
+      border-radius: 999px;
+      font-size: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn-back:hover {
+      background-color: #1a8d99;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="checkmark">✔</div>
+    <div class="message">
+      คำสั่งซื้อถูกส่งไปแล้ว<br>
+      โปรดรอการตอบกลับ<br>
+      (โดยเบอร์ติดต่อกลับของท่านคือ <span class="phone" id="userPhone">...</span>)
+    </div>
+    <a href="index.html" class="btn-back">← กลับหน้าแรก</a>
+  </div>
+
+  <script>
+    const phone = localStorage.getItem('latestPhone') || 'ไม่ทราบ';
+    document.getElementById('userPhone').textContent = phone;
+    localStorage.removeItem('latestPhone'); // ล้างข้อมูลหลังแสดงแล้ว
+  </script>
+</body>
+</html>

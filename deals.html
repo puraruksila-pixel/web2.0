@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ตะกร้าสินค้า</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            background-color: #f4f4f4;
+            max-width: 900px;
+            margin: auto;
+        }
+        h2 {
+            color: #22b3c1;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #22b3c1;
+            color: white;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        .btn-delete {
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-delete:hover {
+            background-color: #e60000;
+        }
+        .btn-order {
+            display: block;
+            margin: 30px auto 0;
+            background-color: #22b3c1;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 999px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .btn-order:hover {
+            background-color: #1a8d99;
+        }
+        .btn-back {
+            display: inline-block;
+            margin-bottom: 20px;
+            background-color: #ccc;
+            color: #333;
+            padding: 10px 20px;
+            border-radius: 999px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .empty {
+            text-align: center;
+            margin-top: 50px;
+            font-size: 1.2rem;
+            color: #777;
+        }
+        .customer-info {
+            margin-top: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+        .customer-info input {
+            padding: 10px;
+            width: 250px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        .customer-info input:focus {
+            outline: none;
+            border-color: #22b3c1;
+            box-shadow: 0 0 4px #22b3c188;
+        }
+        .spinner {
+            border: 6px solid #eee;
+            border-top: 6px solid #22b3c1;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 30px auto;
+            display: none;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .checkmark {
+            font-size: 3rem;
+            color: #2e7d32;
+            text-align: center;
+            display: none;
+            margin-top: 20px;
+        }
+        .success-message {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 1.2rem;
+            color: #2e7d32;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h2>ตะกร้าสินค้า</h2>
+    <div style="text-align:center;">
+        <a href="index.html" class="btn-back">← กลับหน้าแรก</a>
+    </div>
+    <div id="cartContainer"></div>
+
+    <div id="spinner" class="spinner"></div>
+    <div id="checkmark" class="checkmark">✔</div>
+    <div id="successMessage" class="success-message"></div>
+
+    <script>
+        const cartContainer = document.getElementById("cartContainer");
+
+        function renderCart() {
+            const cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+            if (cart.length === 0) {
+                cartContainer.innerHTML = '<div class="empty">ยังไม่มีสินค้าที่เลือก</div>';
+                return;
+            }
+
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>สินค้า</th>
+                            <th>ไซส์</th>
+                            <th>จำนวน</th>
+                            <th>ราคา</th>
+                            <th>ลบ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            let total = 0;
+            let itemsDetails = [];
+
+            cart.forEach((item, index) => {
+                const itemTotal = item.price * item.qty;
+                total += itemTotal;
+                html += `
+                    <tr>
+                        <td>${item.name}</td>
+                        <td>${item.size}</td>
+                        <td>${item.qty}</td>
+                        <td>${itemTotal.toLocaleString()} บาท</td>
+                        <td><button class="btn-delete" onclick="removeFromCart(${index})">ลบ</button></td>
+                    </tr>
+                `;
+                itemsDetails.push(`- ${item.name} (ไซส์: ${item.size}, จำนวน: ${item.qty}, ราคา: ${itemTotal.toLocaleString()} บาท)`);
+            });
+
+            html += `
+                    <tr>
+                        <td colspan="3"><strong>รวมทั้งหมด</strong></td>
+                        <td colspan="2"><strong>${total.toLocaleString()} บาท</strong></td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <form id="orderForm" action="https://formspree.io/f/mjkrnolq" method="POST">
+                    <div class="customer-info">
+                        <input type="text" id="fname" name="ชื่อ" placeholder="ชื่อ" required>
+                        <input type="text" id="lname" name="นามสกุล" placeholder="นามสกุล" required>
+                        <input type="tel" id="phone" name="เบอร์โทร" placeholder="เบอร์โทร" required>
+                        
+                        <input type="hidden" name="รายการสินค้า" value="${itemsDetails.join('\n')}">
+                        <input type="hidden" name="ยอดรวมทั้งหมด" value="${total.toLocaleString()} บาท">
+                    </div>
+
+                    <button type="submit" class="btn-order">สั่งซื้อ</button>
+                </form>
+            `;
+
+            cartContainer.innerHTML = html;
+        }
+
+        function removeFromCart(index) {
+            let cart = JSON.parse(localStorage.getItem("cart")) || [];
+            cart.splice(index, 1);
+            localStorage.setItem("cart", JSON.stringify(cart));
+            renderCart();
+        }
+
+        renderCart();
+
+        document.addEventListener('submit', function(e) {
+            if (e.target.matches('form')) {
+                e.preventDefault();
+
+                const phone = document.getElementById('phone').value;
+                if (!phone) {
+                    alert("กรุณากรอกเบอร์โทร");
+                    return;
+                }
+
+                e.target.style.display = 'none';
+                document.getElementById('spinner').style.display = 'block';
+
+                const formData = new FormData(e.target);
+                fetch(e.target.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'Accept': 'application/json' }
+                }).then(response => {
+                    document.getElementById('spinner').style.display = 'none';
+                    document.getElementById('checkmark').style.display = 'block';
+                    document.getElementById('successMessage').innerHTML = `
+                        คำสั่งซื้อถูกส่งไปแล้ว<br>
+                        โปรดรอการตอบกลับ<br>
+                        (โดยเบอร์ติดต่อกลับของท่านคือ <strong>${phone}</strong>)
+                    `;
+                    document.getElementById('successMessage').style.display = 'block';
+                    localStorage.removeItem('cart');
+                }).catch(error => {
+                    alert('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
+                    console.error(error);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
